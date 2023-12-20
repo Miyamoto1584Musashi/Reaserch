@@ -1,74 +1,38 @@
+from random import randint
+import itertools
+import time
 
-def writing_sudoku(board):
-    """Sudoku output to the screen"""
+def graph_generator(n):
+    graph = [[0 for j in range(n)] for i in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                if graph[i][j] == 0:
+                    graph[i][j] = randint(1, 10000)
+                    graph[j][i] = graph[i][j]
+    return graph
 
-    for i in range(0, len(board)):
-        if i % 3 == 0:
-            print('- - - - - - - - - - - - -')
-        for j in range(0, len(board)):
-            if j % 3 == 0:
-                print('|', end=' ')
-            print(board[i][j], end=' ')
-        print('|', end='\n')
-    print('- - - - - - - - - - - - -', end='\n')
-
-
-def reading_sudoku():
-    """Reading Sudoku from a file"""
-
-    with open("Sudoku", "r") as file:
-        sudoku = [[int(j) for j in i.split() if j != '-' and j != '|'] for i in file]
-        board = []
-
-        for i in range(len(sudoku)):
-            if len(sudoku[i]) != 0:
-                board.append(sudoku[i])
-
-        return board
-
-
-
-
-
-def is_valid(board, num, row, col):
-    """Checking whether it is possible to put a number in a cell"""
-
-    for i in range(9):
-        if board[row][i] == num:
-            return False
-
-    for i in range(9):
-        if board[i][col] == num:
-            return False
-
-    start_row = row - row % 3
-    start_col = col - col % 3
-
-    for i in range(3):
-        for j in range(3):
-            if board[i + start_row][j + start_col] == num:
-                return False
-    return True
-
-def solve_sudoku(board):
-    """Solving Sudoku using an backtracking algorithm"""
-
-    for row in range(9):
-        for col in range(9):
-            if board[row][col] == 0:
-                for num in range(1, 10):
-                    if is_valid(board, num, row, col):
-                        board[row][col] = num
-                        if solve_sudoku(board):
-                            return True
-                        board[row][col] = 0
-                return False
-    return True
+def f(x, graph):
+    sum_distance = 0
+    for i in range(len(x) - 1):
+        sum_distance += graph[x[i]][x[i + 1]]
+    sum_distance += graph[x[0]][x[-1]]
+    return sum_distance
+def tst(initial_x, graph):
+    current_f = f(initial_x, graph)
+    final_x = initial_x
+    for current_x in itertools.permutations(initial_x):
+        next_f = f(current_x, graph)
+        if next_f < current_f:
+            current_f = next_f
+            final_x = current_x
+    final_f = current_f
+    return final_f, final_x
 
 if __name__ == '__main__':
-    board = reading_sudoku()
-    print("The initial board:")
-    writing_sudoku(board)
-    solve_sudoku(board)
-    print("Solved board:")
-    writing_sudoku(board)
+
+    graph =[[0, 9176, 8711, 1596, 8304], [9176, 0, 377, 9861, 9113], [8711, 377, 0, 7860, 7139], [1596, 9861, 7860, 0, 5143], [8304, 9113, 7139, 5143, 0]]
+    initial_x = [int(i) for i in range(len(graph))]
+    print(tst(initial_x, graph), end=' ')
+
+    
